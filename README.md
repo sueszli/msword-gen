@@ -1,4 +1,4 @@
-# mswordGen
+_to install:_
 
 ```bash
 # clone
