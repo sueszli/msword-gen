@@ -9,13 +9,13 @@
         <link
             rel="icon"
             href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>
-            📄
+            ⚪️
             </text></svg>" />
 
         <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
         <script type="text/javascript" src="notificationToast.js"></script>
 
-        <script src="https://cdn.jsdelivr.net/npm/docx@8.2.4/build/index.umd.min.js"></script>
+        <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/docx@8.2.4/build/index.umd.min.js"></script>
         <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.0/FileSaver.min.js"></script>
     </head>
 
@@ -32,37 +32,49 @@
     </body>
 
     <script>
+        // https://docx.js.org/#/
         function processImages(images) {
-            // https://docx.js.org/#/
             const doc = new docx.Document({
-                sections: [], // throws error if empty
+                sections: [],
             })
 
-            // add images
-            for (let i = 0; i < images.length; i++) {
-                const image = images[i]
+            const imagePromises = images.map((image) => {
+                return new Promise((resolve, reject) => {
+                    const img = new Image()
+                    img.src = URL.createObjectURL(image)
+                    img.onload = () => {
+                        console.log(`Width x Height: ${img.width} x ${img.height}`)
 
-                const imageParagraph = new docx.Paragraph({
-                    children: [
-                        new docx.ImageRun({
-                            data: image,
-                            transformation: {
-                                width: 500,
-                                height: 500,
-                            },
-                        }),
-                    ],
+                        const imageParagraph = new docx.Paragraph({
+                            children: [
+                                new docx.ImageRun({
+                                    data: image,
+                                    transformation: {
+                                        width: img.width,
+                                        height: img.height,
+                                    },
+                                }),
+                            ],
+                        })
+                        doc.addSection({
+                            children: [imageParagraph],
+                        })
+                        resolve()
+                    }
+                    img.onerror = reject
                 })
-                doc.addSection({
-                    children: [imageParagraph],
-                })
-            }
-
-            // download
-            docx.Packer.toBlob(doc).then((blob) => {
-                saveAs(blob, 'example.docx')
-                console.log('Document created successfully')
             })
+
+            Promise.all(imagePromises)
+                .then(() => {
+                    docx.Packer.toBlob(doc).then((blob) => {
+                        saveAs(blob, 'example.docx')
+                        NotificationToast.success('Document created successfully')
+                    })
+                })
+                .catch((error) => {
+                    console.error('Error processing images:', error)
+                })
         }
 
         window.onload = async () => {
@@ -73,8 +85,7 @@
                     return
                 }
                 NotificationToast.success(`You have selected ${numFiles} files.`)
-                const files = e.target.files
-
+                const files = Array.from(e.target.files)
                 processImages(files)
             })
         }
