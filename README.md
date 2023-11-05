@@ -1,6 +1,6 @@
 _to install:_
 
-```bash
+````bash
 # clone
 git clone https://github.com/sueszli/mswordGen.git
 cd mswordGen
@@ -12,5 +12,7 @@ pip3 install pipreqs >/dev/null && rm -rf requirements.txt > /dev/null && pipreq
 pip3 install -r requirements.txt >/dev/null
 
 # run
-python3 mswordgen.py
+python3 -m venv .venv && source .venv/bin/activate
+streamlit run mswordgen.py
 ```
+````
