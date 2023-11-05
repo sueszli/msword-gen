@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>mswordGen</title>
+
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/water.css" />
+        <link
+            rel="icon"
+            href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>
+            📄
+            </text></svg>" />
+
+        <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+        <script type="text/javascript" src="notificationToast.js"></script>
+
+        <script src="https://cdn.jsdelivr.net/npm/docx@8.2.4/build/index.umd.min.js"></script>
+        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.0/FileSaver.min.js"></script>
+    </head>
+
+    <body>
+        <header>
+            <h1>Microsoft Word Generator</h1>
+            <p>This website lets you generate Microsoft Word document (.docx) from a bunch of images.</p>
+            <p>To get started, just upload your images below - and you're good to go!</p>
+        </header>
+
+        <main>
+            <input type="file" class="file-input" name="filefield" multiple="multiple" accept="image/*" />
+        </main>
+    </body>
+
+    <script>
+        function processImages(images) {
+            // https://docx.js.org/#/
+            const doc = new docx.Document({
+                sections: [], // throws error if empty
+            })
+
+            // add images
+            for (let i = 0; i < images.length; i++) {
+                const image = images[i]
+
+                const imageParagraph = new docx.Paragraph({
+                    children: [
+                        new docx.ImageRun({
+                            data: image,
+                            transformation: {
+                                width: 500,
+                                height: 500,
+                            },
+                        }),
+                    ],
+                })
+                doc.addSection({
+                    children: [imageParagraph],
+                })
+            }
+
+            // download
+            docx.Packer.toBlob(doc).then((blob) => {
+                saveAs(blob, 'example.docx')
+                console.log('Document created successfully')
+            })
+        }
+
+        window.onload = async () => {
+            const fileInput = document.querySelector('.file-input')
+            fileInput.addEventListener('change', (e) => {
+                const numFiles = e.target.files.length
+                if (numFiles === 0) {
+                    return
+                }
+                NotificationToast.success(`You have selected ${numFiles} files.`)
+                const files = e.target.files
+
+                processImages(files)
+            })
+        }
+    </script>
+
+    <style></style>
+</html>
