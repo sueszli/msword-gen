@@ -1,10 +1,8 @@
 # microsoft word (docx) generator
 
-a simple website that:
-
 1. reads all user input files (images)
 2. converts them to base64 (and scales them based on A4 paper size dimensions)
 3. inserts them into a docx file
 4. then downloads the newly created docx file
 
-👉🏻 check out the 'github pages' link to see it in action.
+check it out: https://sueszli.github.io/msword-gen/
